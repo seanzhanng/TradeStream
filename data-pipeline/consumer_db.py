@@ -16,11 +16,22 @@ DB_CONFIG = {
 
 CREATE_TABLE_QUERY = """
 CREATE TABLE IF NOT EXISTS ticks (
-    id SERIAL PRIMARY KEY,
-    symbol TEXT,
-    price DOUBLE PRECISION,
-    volume INTEGER,
-    ts TIMESTAMPTZ
+    id SERIAL,
+    symbol TEXT NOT NULL,
+    price DOUBLE PRECISION NOT NULL,
+    volume INTEGER NOT NULL,
+    ts TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (symbol, ts, id)
+);
+"""
+
+CREATE_HYPERTABLE_QUERY = """
+SELECT create_hypertable(
+    'ticks',
+    'ts',
+    partitioning_column => 'symbol',
+    number_partitions => 8,
+    if_not_exists => TRUE
 );
 """
 
@@ -30,12 +41,18 @@ VALUES ($1, $2, $3, to_timestamp($4));
 """
 
 async def consume_and_store():
-    # connect to TimescaleDB
     conn = await asyncpg.connect(**DB_CONFIG)
-    await conn.execute(CREATE_TABLE_QUERY)
     print("Connected to TimescaleDB")
 
-    # connect to Kafka
+    await conn.execute(CREATE_TABLE_QUERY)
+    print("Ensured ticks table exists")
+
+    try:
+        await conn.execute(CREATE_HYPERTABLE_QUERY)
+        print("Converted ticks table into hypertable with symbol partitioning")
+    except Exception as e:
+        print("Hypertable creation skipped:", e)
+
     consumer = AIOKafkaConsumer(
         TOPIC,
         bootstrap_servers=KAFKA_BROKER,
@@ -54,9 +71,9 @@ async def consume_and_store():
                 tick["symbol"],
                 tick["price"],
                 tick["volume"],
-                tick["timestamp"],
+                tick["timestamp"]
             )
-            print(f"Saved tick: {tick}")
+
     finally:
         await consumer.stop()
         await conn.close()
