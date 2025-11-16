@@ -5,7 +5,7 @@ from app.schemas.user import UserCreate
 from app.schemas.response import Response
 from fastapi import status
 from hashlib import sha256
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 class UserService:
@@ -28,7 +28,7 @@ class UserService:
                 username=new_user.username,
                 email=new_user.email,
                 hashed_password=hashed_pw,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
 
             db.add(user)
@@ -51,3 +51,9 @@ class UserService:
     async def get_all_users(db: AsyncSession):
         result = await db.execute(select(User))
         return result.scalars().all()
+    
+    @staticmethod
+    async def get_user_by_id(user_id: str, db: AsyncSession):
+        result = await db.execute(select(User).filter(User.id == user_id))
+        user = result.scalar_one_or_none()
+        return user
