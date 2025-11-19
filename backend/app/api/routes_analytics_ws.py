@@ -1,11 +1,11 @@
 from fastapi import APIRouter, WebSocket
 import asyncio
-from app.services.ws.vwap_broadcaster import connected_clients
+from app.services.ws.analytics_broadcaster import connected_clients
 
 router = APIRouter(tags=["WebSockets"])
 
-@router.websocket("/ws/vwap")
-async def websocket_vwap_multi(websocket: WebSocket, symbols: str = ""):
+@router.websocket("/ws/analytics")
+async def websocket_analytics_multi(websocket: WebSocket, symbols: str = ""):
     await websocket.accept()
 
     if not symbols.strip():
@@ -27,8 +27,8 @@ async def websocket_vwap_multi(websocket: WebSocket, symbols: str = ""):
         connected_clients.pop(websocket, None)
         await websocket.close()
 
-@router.websocket("/ws/vwap/{symbol}")
-async def websocket_vwap_symbol(websocket: WebSocket, symbol: str):
+@router.websocket("/ws/analytics/{symbol}")
+async def websocket_analytics_symbol(websocket: WebSocket, symbol: str):
     await websocket.accept()
 
     subs = {symbol.upper()}

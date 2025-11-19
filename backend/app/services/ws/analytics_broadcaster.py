@@ -7,11 +7,11 @@ TOPIC = "market_analytics"
 
 connected_clients = {}
 
-async def vwap_kafka_consumer():
+async def analytics_kafka_consumer():
     consumer = AIOKafkaConsumer(
         TOPIC,
         bootstrap_servers=KAFKA_BROKER,
-        group_id="backend-vwap-group",
+        group_id="backend-analytics-group",
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
         auto_offset_reset="latest"
     )
@@ -19,7 +19,7 @@ async def vwap_kafka_consumer():
     while True:
         try:
             await consumer.start()
-            print("Connected to Kafka: VWAP consumer started")
+            print("Connected to Kafka: Analytics consumer started")
             break
         except Exception as e:
             await asyncio.sleep(3)

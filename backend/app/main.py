@@ -5,10 +5,10 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import engine, Base
 from app.api.routes_users import router as users_router
-from app.api.routes_vwap_ws import router as vwap_router
+from app.api.routes_analytics_ws import router as analytics_router
 from app.core.logger import logger
 from app.api.routes_watchlist import router as watchlist_router
-from app.services.ws.vwap_broadcaster import vwap_kafka_consumer
+from app.services.ws.analytics_broadcaster import analytics_kafka_consumer
 from app.api.routes_ticks_ws import router as ticks_router
 from app.services.ws.tick_broadcaster import tick_kafka_consumer
 
@@ -22,8 +22,8 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(tick_kafka_consumer())
     logger.info("Tick background consumer started")
 
-    asyncio.create_task(vwap_kafka_consumer())
-    logger.info("VWAP background consumer started")
+    asyncio.create_task(analytics_kafka_consumer())
+    logger.info("Analytics background consumer started")
 
     yield
 
@@ -46,5 +46,5 @@ async def health_check():
 
 app.include_router(users_router, prefix="/api")
 app.include_router(watchlist_router, prefix="/api")
-app.include_router(vwap_router)
+app.include_router(analytics_router)
 app.include_router(ticks_router)
