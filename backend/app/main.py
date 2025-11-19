@@ -11,19 +11,20 @@ from app.api.routes_watchlist import router as watchlist_router
 from app.services.ws.analytics_broadcaster import analytics_kafka_consumer
 from app.api.routes_ticks_ws import router as ticks_router
 from app.services.ws.tick_broadcaster import tick_kafka_consumer
+from app.services.analytics_consumer import consume_analytics
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting backend...")
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
     asyncio.create_task(tick_kafka_consumer())
     logger.info("Tick background consumer started")
 
     asyncio.create_task(analytics_kafka_consumer())
     logger.info("Analytics background consumer started")
+
+    asyncio.create_task(consume_analytics())
+    logger.info("Analytics DB consumer started")
 
     yield
 

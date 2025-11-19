@@ -1,8 +1,18 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, func, ForeignKey
+from sqlalchemy import (
+    Column,
+    String,
+    DateTime,
+    func,
+    ForeignKey,
+    TIMESTAMP,
+    Float,
+    Boolean
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.session import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -25,6 +35,7 @@ class User(Base):
         cascade="all, delete-orphan"
     )
 
+
 class Watchlist(Base):
     __tablename__ = "watchlists"
 
@@ -36,3 +47,15 @@ class Watchlist(Base):
     symbols = Column(String, nullable=False)
 
     user = relationship("User", back_populates="watchlist")
+
+
+class Analytics(Base):
+    __tablename__ = "analytics"
+
+    time = Column(TIMESTAMP(timezone=True), primary_key=True)
+    symbol = Column(String, primary_key=True)
+    vwap = Column(Float)
+    volatility = Column(Float)
+    pct_change = Column(Float)
+    avg_volume = Column(Float)
+    volume_spike = Column(Boolean)

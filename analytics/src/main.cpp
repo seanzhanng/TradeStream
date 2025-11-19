@@ -72,7 +72,9 @@ int main() {
                 std::string symbol = tickJson["symbol"];
                 double price = tickJson["price"];
                 int volume = tickJson["volume"];
-                double ts = tickJson["timestamp"];
+                double ts = std::chrono::duration<double>(
+                    std::chrono::system_clock::now().time_since_epoch()
+                ).count();
 
                 std::cout << "📥 Consumed tick → "
                           << symbol << " | price=" << price
