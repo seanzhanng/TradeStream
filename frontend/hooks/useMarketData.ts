@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { StreamEvent } from "@/lib/dashboardData";
-import { MAX_STREAM_EVENTS } from "@/lib/dashboardData";
+import { MAX_STREAM_EVENTS, MAX_TICK_HISTORY } from "@/lib/dashboardData";
 
-interface Tick {
+export interface TickEvent {
   symbol: string;
   price: number;
   volume: number;
@@ -12,7 +12,8 @@ interface Tick {
 }
 
 interface MarketDataState {
-  ticksBySymbol: Record<string, Tick>;
+  ticksBySymbol: Record<string, TickEvent>;
+  tickHistoryBySymbol: Record<string, TickEvent[]>;
   streamEvents: StreamEvent[];
 }
 
@@ -21,6 +22,7 @@ const WS_BASE_URL = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
 export default function useMarketData(symbols: string[], focusSymbol: string) {
   const [state, setState] = useState<MarketDataState>({
     ticksBySymbol: {},
+    tickHistoryBySymbol: {},
     streamEvents: [],
   });
 
@@ -52,17 +54,31 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
             timestamp: number;
           };
 
-          const tick: Tick = {
-            symbol: raw.symbol,
-            price: raw.price,
-            volume: raw.volume,
-            timestamp: raw.timestamp,
-          };
-
           setState((prev) => {
+            const tick: TickEvent = {
+              symbol: raw.symbol,
+              price: raw.price,
+              volume: raw.volume,
+              timestamp: raw.timestamp,
+            };
+
+            // latest tick per symbol
             const nextTicks = {
               ...prev.ticksBySymbol,
               [tick.symbol]: tick,
+            };
+
+            // sliding window history per symbol
+            const prevHistoryForSymbol =
+              prev.tickHistoryBySymbol[tick.symbol] ?? [];
+            const nextHistoryForSymbol = [
+              ...prevHistoryForSymbol,
+              tick,
+            ].slice(-MAX_TICK_HISTORY);
+
+            const nextHistoryBySymbol = {
+              ...prev.tickHistoryBySymbol,
+              [tick.symbol]: nextHistoryForSymbol,
             };
 
             const timeStr = new Date(
@@ -81,7 +97,11 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
 
             return {
               ticksBySymbol: nextTicks,
-              streamEvents: [newEvent, ...prev.streamEvents].slice(0, MAX_STREAM_EVENTS),
+              tickHistoryBySymbol: nextHistoryBySymbol,
+              streamEvents: [
+                newEvent,
+                ...prev.streamEvents,
+              ].slice(0, MAX_STREAM_EVENTS),
             };
           });
         } catch (err) {
@@ -109,10 +129,13 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
   }, [symbols.join(","), focusSymbol]);
 
   const lastTickForFocus = state.ticksBySymbol[focusSymbol];
+  const historyForFocus = state.tickHistoryBySymbol[focusSymbol] ?? [];
 
   return {
     ticksBySymbol: state.ticksBySymbol,
+    tickHistoryBySymbol: state.tickHistoryBySymbol,
     streamEvents: state.streamEvents,
     lastTickForFocus,
+    historyForFocus,
   };
 }

@@ -12,7 +12,13 @@ import { ALERT_ITEMS, WATCHLIST_ITEMS } from "@/lib/dashboardData";
 import useDashboardData from "@/hooks/useDashboardData";
 
 export default function DashboardPage() {
-  const { focusSymbol, metrics, streamEvents } = useDashboardData();
+  const {
+    focusSymbol,
+    metrics,
+    streamEvents,
+    priceSeries,
+    priceSummary,
+  } = useDashboardData();
 
   return (
     <div className="relative flex min-h-screen w-full overflow-hidden bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
@@ -28,11 +34,12 @@ export default function DashboardPage() {
           <div className="flex flex-1 flex-col gap-4 overflow-hidden">
             <ChartCard
               symbol={focusSymbol}
-              priceChangePercent="+1.42%"
-              open="188.3"
-              high="192.1"
-              low="187.9"
-              close="191.4"
+              series={priceSeries}
+              open={priceSummary.open}
+              high={priceSummary.high}
+              low={priceSummary.low}
+              close={priceSummary.close}
+              pctChange={priceSummary.pctChange}
             />
 
             <MetricGrid metrics={metrics} />

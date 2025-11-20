@@ -1,17 +1,31 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  METRIC_DEFINITIONS,
-  FOCUS_SYMBOL,
-} from "@/lib/dashboardData";
-import useMarketData from "@/hooks/useMarketData";
+import { METRIC_DEFINITIONS, FOCUS_SYMBOL } from "@/lib/dashboardData";
+import useMarketData, { TickEvent } from "@/hooks/useMarketData";
 import useAnalyticsData from "@/hooks/useAnalyticsData";
 
 const SUBSCRIBED_SYMBOLS = ["AAPL", "SPY", "ETH-USD"] as const;
 
+export interface PricePoint {
+  timestamp: number;
+  price: number;
+}
+
+export interface PriceSummary {
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;
+  pctChange?: number;
+}
+
 export default function useDashboardData() {
-  const { streamEvents, lastTickForFocus } = useMarketData(
+  const {
+    streamEvents,
+    lastTickForFocus,
+    historyForFocus,
+  } = useMarketData(
     SUBSCRIBED_SYMBOLS as unknown as string[],
     FOCUS_SYMBOL
   );
@@ -21,6 +35,39 @@ export default function useDashboardData() {
     FOCUS_SYMBOL
   );
 
+  // Build price series for chart from tick history
+  const priceSeries: PricePoint[] = useMemo(
+    () =>
+      (historyForFocus as TickEvent[]).map((tick) => ({
+        timestamp: tick.timestamp,
+        price: tick.price,
+      })),
+    [historyForFocus]
+  );
+
+  // Compute O/H/L/C + % change over the visible window
+  const priceSummary: PriceSummary = useMemo(() => {
+    if (priceSeries.length === 0) {
+      return {};
+    }
+
+    const open = priceSeries[0].price;
+    const close = priceSeries[priceSeries.length - 1].price;
+
+    let high = open;
+    let low = open;
+
+    for (const point of priceSeries) {
+      if (point.price > high) high = point.price;
+      if (point.price < low) low = point.price;
+    }
+
+    const pctChange =
+      open !== 0 ? ((close - open) / open) * 100 : undefined;
+
+    return { open, high, low, close, pctChange };
+  }, [priceSeries]);
+
   const metrics = useMemo(
     () =>
       METRIC_DEFINITIONS.map((metric) => {
@@ -28,9 +75,9 @@ export default function useDashboardData() {
         if (metric.label === "Last Tick" && lastTickForFocus) {
           return {
             ...metric,
-            value: `$${lastTickForFocus.price.toFixed(2)} • ${
-              lastTickForFocus.volume
-            }`,
+            value: `$${lastTickForFocus.price.toFixed(
+              2
+            )} • ${lastTickForFocus.volume}`,
           };
         }
 
@@ -75,6 +122,8 @@ export default function useDashboardData() {
     subscribedSymbols: SUBSCRIBED_SYMBOLS,
     metrics,
     streamEvents,
+    priceSeries,
+    priceSummary,
     lastTickForFocus,
     analyticsForFocus,
   };
