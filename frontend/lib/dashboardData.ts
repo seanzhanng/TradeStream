@@ -12,6 +12,9 @@ export const DASHBOARD_NAV_ITEMS = [
 
 export const FOCUS_SYMBOL = "AAPL";
 
+export const MAX_STREAM_EVENTS = 20;
+export const MAX_TICK_HISTORY = 120;
+
 // ---- Metrics ----
 
 export type MetricAccent = "emerald" | "sky" | "amber" | "fuchsia";
@@ -34,17 +37,42 @@ export const METRIC_DEFINITIONS: MetricDefinition[] = [
 export type StreamEventType = "tick" | "analytics" | "alert";
 
 export interface StreamEvent {
+  id: string;
   type: StreamEventType;
   text: string;
 }
 
 export const STREAM_EVENTS: StreamEvent[] = [
-  { type: "tick", text: "[12:30:01.120] Tick • 189.30 @ 500" },
-  { type: "analytics", text: "[12:30:01.125] Analytics • VWAP(5m) → 189.18" },
-  { type: "alert", text: "[12:30:01.200] ALERT • Spread > 0.05 (AAPL)" },
-  { type: "tick", text: "[12:30:02.010] Tick • 189.31 @ 240" },
-  { type: "tick", text: "[12:30:02.540] Tick • 189.33 @ 120" },
-  { type: "analytics", text: "[12:30:03.002] Analytics • Vol(5m) → 12.4%" },
+  {
+    id: "static-1",
+    type: "tick",
+    text: "[12:30:01.120] Tick • 189.30 @ 500",
+  },
+  {
+    id: "static-2",
+    type: "analytics",
+    text: "[12:30:01.125] Analytics • VWAP(5m) → 189.18",
+  },
+  {
+    id: "static-3",
+    type: "alert",
+    text: "[12:30:01.200] ALERT • Spread > 0.05 (AAPL)",
+  },
+  {
+    id: "static-4",
+    type: "tick",
+    text: "[12:30:02.010] Tick • 189.31 @ 240",
+  },
+  {
+    id: "static-5",
+    type: "tick",
+    text: "[12:30:02.540] Tick • 189.33 @ 120",
+  },
+  {
+    id: "static-6",
+    type: "analytics",
+    text: "[12:30:03.002] Analytics • Vol(5m) → 12.4%",
+  },
 ];
 
 // ---- Watchlist ----

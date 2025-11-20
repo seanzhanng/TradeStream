@@ -1,5 +1,6 @@
 // components/dashboard/StreamPanel.tsx
 import type { StreamEvent, StreamEventType } from "@/lib/dashboardData";
+import { MAX_STREAM_EVENTS } from "@/lib/dashboardData";
 
 interface StreamPanelProps {
   events: StreamEvent[];
@@ -19,12 +20,12 @@ export default function StreamPanel({ events }: StreamPanelProps) {
           Stream
         </span>
         <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] text-slate-400 border border-slate-700">
-          latest 20 events
+          latest {MAX_STREAM_EVENTS} events
         </span>
       </div>
       <div className="mt-1 space-y-1.5 overflow-auto pr-1 max-h-40">
         {events.map((event) => (
-          <p key={event.text} className={typeClassMap[event.type]}>
+          <p key={event.id} className={typeClassMap[event.type]}>
             {event.text}
           </p>
         ))}
