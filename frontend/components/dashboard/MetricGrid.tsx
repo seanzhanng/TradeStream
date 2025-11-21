@@ -1,4 +1,3 @@
-// components/dashboard/MetricGrid.tsx
 import type { MetricDefinition } from "@/lib/dashboardData";
 import MetricCard from "./MetricCard";
 

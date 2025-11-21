@@ -1,4 +1,3 @@
-// components/alerts/AlertsCard.tsx
 import type { AlertItem } from "@/lib/dashboardData";
 import AlertRow from "./AlertRow";
 

@@ -1,11 +1,16 @@
-// components/layout/Sidebar.tsx
+"use client";
+
 import { DASHBOARD_NAV_ITEMS } from "@/lib/dashboardData";
+import useSystemHealth from "@/hooks/useSystemHealth";
 
 interface SidebarProps {
   activeItem?: string;
 }
 
 export default function Sidebar({ activeItem = "Dashboard" }: SidebarProps) {
+  const { kafka } = useSystemHealth();
+  const kafkaOnline = kafka === "online";
+
   return (
     <aside className="flex h-full min-h-screen w-64 flex-col border-r border-slate-800/80 bg-slate-950/70 px-5 py-6 backdrop-blur-xl">
       <div className="mb-8 flex items-center justify-between">
@@ -47,16 +52,27 @@ export default function Sidebar({ activeItem = "Dashboard" }: SidebarProps) {
       <div className="mt-6 space-y-2 text-[11px] text-slate-500">
         <div className="flex items-center justify-between">
           <span>Kafka</span>
-          <span className="flex items-center gap-1 text-emerald-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
-            Online
+          <span
+            className={
+              "flex items-center gap-1 " +
+              (kafkaOnline ? "text-emerald-300" : "text-rose-300")
+            }
+          >
+            <span
+              className={
+                "h-2 w-2 rounded-full " +
+                (kafkaOnline
+                  ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]"
+                  : "bg-rose-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]")
+              }
+            />
+            {kafkaOnline ? "Online" : "Offline"}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span>Analytics</span>
-          <span className="text-sky-300">Healthy</span>
+
+        <div className="pt-2 text-[10px] text-slate-600">
+          v0.1 • internal
         </div>
-        <div className="pt-2 text-[10px] text-slate-600">v0.1 • internal</div>
       </div>
     </aside>
   );

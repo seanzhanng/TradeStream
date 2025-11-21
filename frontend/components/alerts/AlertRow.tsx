@@ -1,4 +1,3 @@
-// components/alerts/AlertRow.tsx
 import type { AlertItem, AlertAccent } from "@/lib/dashboardData";
 
 type AlertRowProps = AlertItem;

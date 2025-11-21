@@ -1,5 +1,3 @@
-// lib/dashboardData.ts
-
 // Sidebar
 export const DASHBOARD_NAV_ITEMS = [
   "Dashboard",
@@ -12,7 +10,7 @@ export const DASHBOARD_NAV_ITEMS = [
 
 export const FOCUS_SYMBOL = "AAPL";
 
-export const MAX_STREAM_EVENTS = 20;
+export const MAX_STREAM_EVENTS = 500;
 export const MAX_TICK_HISTORY = 120;
 
 // ---- Metrics ----
@@ -92,36 +90,36 @@ export const WATCHLIST_ITEMS: WatchlistItem[] = [
   {
     symbol: "AAPL",
     name: "Apple Inc.",
-    price: "147.35",
-    change: "+0.32%",
-    changeColor: "emerald",
+    price: "—",
+    change: "—",
+    changeColor: "sky",
   },
   {
     symbol: "MSFT",
     name: "Microsoft Corp.",
-    price: "372.18",
-    change: "+1.05%",
+    price: "—",
+    change: "—",
     changeColor: "sky",
   },
   {
     symbol: "AMZN",
     name: "Amazon.com Inc.",
-    price: "132.11",
-    change: "-0.42%",
-    changeColor: "rose",
+    price: "—",
+    change: "—",
+    changeColor: "sky",
   },
   {
     symbol: "TSLA",
     name: "Tesla Inc.",
-    price: "242.67",
-    change: "+2.31%",
-    changeColor: "emerald",
+    price: "—",
+    change: "—",
+    changeColor: "sky",
   },
   {
     symbol: "GOOG",
     name: "Alphabet Inc.",
-    price: "138.54",
-    change: "+0.18%",
+    price: "—",
+    change: "—",
     changeColor: "sky",
   },
 ];

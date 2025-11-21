@@ -1,4 +1,3 @@
-// components/dashboard/StreamPanel.tsx
 import type { StreamEvent, StreamEventType } from "@/lib/dashboardData";
 import { MAX_STREAM_EVENTS } from "@/lib/dashboardData";
 

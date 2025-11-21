@@ -8,7 +8,7 @@ export interface TickEvent {
   symbol: string;
   price: number;
   volume: number;
-  timestamp: number; // seconds (float)
+  timestamp: number;
 }
 
 interface MarketDataState {
@@ -29,12 +29,14 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (!symbols.length) return;
+  const hasSymbols = symbols.length > 0;
+  const symbolsKey = symbols.join(",");
 
-    const symbolParam = symbols.join(",");
+  useEffect(() => {
+    if (!hasSymbols || !symbolsKey) return;
+
     const wsUrl = `${WS_BASE_URL}/ws/ticks?symbols=${encodeURIComponent(
-      symbolParam
+      symbolsKey
     )}`;
 
     function connect() {
@@ -62,13 +64,11 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
               timestamp: raw.timestamp,
             };
 
-            // latest tick per symbol
             const nextTicks = {
               ...prev.ticksBySymbol,
               [tick.symbol]: tick,
             };
 
-            // sliding window history per symbol
             const prevHistoryForSymbol =
               prev.tickHistoryBySymbol[tick.symbol] ?? [];
             const nextHistoryForSymbol = [
@@ -127,7 +127,7 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
       wsRef.current?.close();
     };
-  }, [symbols.join(","), focusSymbol]);
+  }, [hasSymbols, symbolsKey]);
 
   const lastTickForFocus = state.ticksBySymbol[focusSymbol];
   const historyForFocus = state.tickHistoryBySymbol[focusSymbol] ?? [];

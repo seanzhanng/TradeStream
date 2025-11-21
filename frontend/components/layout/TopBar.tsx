@@ -1,4 +1,3 @@
-// components/layout/TopBar.tsx
 import { FOCUS_SYMBOL } from "@/lib/dashboardData";
 
 export default function TopBar() {

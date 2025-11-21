@@ -6,7 +6,7 @@ export interface AnalyticsSnapshot {
   symbol: string;
   vwap: number;
   volatility: number;
-  pctChange: number;     // 0.84 = +0.84%
+  pctChange: number;
   avgVolume: number;
   volumeSpike: boolean;
   timestamp?: number;
@@ -27,12 +27,14 @@ export default function useAnalyticsData(symbols: string[], focusSymbol: string)
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    if (!symbols.length) return;
+  const hasSymbols = symbols.length > 0;
+  const symbolsKey = symbols.join(",");
 
-    const symbolParam = symbols.join(",");
+  useEffect(() => {
+    if (!hasSymbols || !symbolsKey) return;
+
     const wsUrl = `${WS_BASE_URL}/ws/analytics?symbols=${encodeURIComponent(
-      symbolParam
+      symbolsKey
     )}`;
 
     function connect() {
@@ -45,16 +47,6 @@ export default function useAnalyticsData(symbols: string[], focusSymbol: string)
 
       ws.onmessage = (event) => {
         try {
-          // shape from your backend:
-          // {
-          //   "avg_volume": 932.8,
-          //   "pct_change": 0.8471,
-          //   "symbol": "AAPL",
-          //   "timestamp": 1763671901.25,
-          //   "volatility": 3.25,
-          //   "volume_spike": false,
-          //   "vwap": 149.44
-          // }
           const raw = JSON.parse(event.data) as {
             avg_volume: number;
             pct_change: number;
@@ -103,7 +95,7 @@ export default function useAnalyticsData(symbols: string[], focusSymbol: string)
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
       wsRef.current?.close();
     };
-  }, [symbols.join(","), focusSymbol]);
+  }, [hasSymbols, symbolsKey]);
 
   const analyticsForFocus = state.analyticsBySymbol[focusSymbol];
 

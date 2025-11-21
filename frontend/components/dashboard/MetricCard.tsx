@@ -1,4 +1,3 @@
-// components/dashboard/MetricCard.tsx
 import type { MetricAccent } from "@/lib/dashboardData";
 
 export interface MetricCardProps {

@@ -1,4 +1,3 @@
-// components/watchlist/WatchlistRow.tsx
 import type {
   WatchlistItem,
   WatchlistChangeColor,

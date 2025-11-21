@@ -1,4 +1,3 @@
-// components/watchlist/WatchlistCard.tsx
 import type { WatchlistItem } from "@/lib/dashboardData";
 import WatchlistRow from "./WatchlistRow";
 
