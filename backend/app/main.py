@@ -3,15 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.session import engine, Base
-from app.api.routes_users import router as users_router
-from app.api.routes_analytics_ws import router as analytics_router
 from app.core.logger import logger
-from app.api.routes_watchlist import router as watchlist_router
+
 from app.services.ws.analytics_broadcaster import analytics_kafka_consumer
-from app.api.routes_ticks_ws import router as ticks_router
 from app.services.ws.tick_broadcaster import tick_kafka_consumer
 from app.services.analytics_consumer import consume_analytics
+
+from app.api.routes_users import router as users_router
+from app.api.routes_watchlist import router as watchlist_router
+from app.api.routes_health import router as health_router
+from app.api.routes_analytics_ws import router as analytics_router
+from app.api.routes_ticks_ws import router as ticks_router
+from app.api.routes_baselines import router as baselines_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,3 +54,5 @@ app.include_router(users_router, prefix="/api")
 app.include_router(watchlist_router, prefix="/api")
 app.include_router(analytics_router)
 app.include_router(ticks_router)
+app.include_router(health_router, prefix="/api")
+app.include_router(baselines_router, prefix="/api")
