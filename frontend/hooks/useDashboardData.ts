@@ -1,11 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { METRIC_DEFINITIONS, FOCUS_SYMBOL } from "@/lib/dashboardData";
+import {
+  METRIC_DEFINITIONS,
+  FOCUS_SYMBOL,
+  WATCHLIST_ITEMS,
+} from "@/lib/dashboardData";
+import type {
+  WatchlistItem,
+  WatchlistChangeColor,
+} from "@/lib/dashboardData";
 import useMarketData, { TickEvent } from "@/hooks/useMarketData";
 import useAnalyticsData from "@/hooks/useAnalyticsData";
-
-const SUBSCRIBED_SYMBOLS = ["AAPL", "SPY", "ETH-USD"] as const;
 
 export interface PricePoint {
   timestamp: number;
@@ -20,22 +26,28 @@ export interface PriceSummary {
   pctChange?: number;
 }
 
+// Subscribe to all symbols that appear in the watchlist
+const SUBSCRIBED_SYMBOLS = Array.from(
+  new Set([
+    FOCUS_SYMBOL,
+    ...WATCHLIST_ITEMS.map((item) => item.symbol),
+  ])
+) as string[];
+
 export default function useDashboardData() {
   const {
     streamEvents,
     lastTickForFocus,
     historyForFocus,
-  } = useMarketData(
-    SUBSCRIBED_SYMBOLS as unknown as string[],
-    FOCUS_SYMBOL
-  );
+    ticksBySymbol,
+  } = useMarketData(SUBSCRIBED_SYMBOLS, FOCUS_SYMBOL);
 
   const { analyticsForFocus } = useAnalyticsData(
-    SUBSCRIBED_SYMBOLS as unknown as string[],
+    SUBSCRIBED_SYMBOLS,
     FOCUS_SYMBOL
   );
 
-  // Build price series for chart from tick history
+  // ---- Price series for chart ----
   const priceSeries: PricePoint[] = useMemo(
     () =>
       (historyForFocus as TickEvent[]).map((tick) => ({
@@ -45,7 +57,7 @@ export default function useDashboardData() {
     [historyForFocus]
   );
 
-  // Compute O/H/L/C + % change over the visible window
+  // ---- O/H/L/C + % over visible window ----
   const priceSummary: PriceSummary = useMemo(() => {
     if (priceSeries.length === 0) {
       return {};
@@ -68,6 +80,7 @@ export default function useDashboardData() {
     return { open, high, low, close, pctChange };
   }, [priceSeries]);
 
+  // ---- Metrics row ----
   const metrics = useMemo(
     () =>
       METRIC_DEFINITIONS.map((metric) => {
@@ -117,6 +130,45 @@ export default function useDashboardData() {
     [lastTickForFocus, analyticsForFocus]
   );
 
+  // ---- Live watchlist ----
+  const watchlistItems: WatchlistItem[] = useMemo(
+    () =>
+      WATCHLIST_ITEMS.map((item) => {
+        const liveTick = ticksBySymbol[item.symbol];
+
+        // No live data yet → fall back to static item
+        if (!liveTick) {
+          return item;
+        }
+
+        const currentPrice = liveTick.price;
+        const priceStr = currentPrice.toFixed(2);
+
+        // Treat the static price as "previous close" for % change
+        const baseline = parseFloat(item.price.replace(/,/g, ""));
+        let changeStr = item.change;
+        let changeColor: WatchlistChangeColor = item.changeColor;
+
+        if (!Number.isNaN(baseline) && baseline > 0) {
+          const pctChange = ((currentPrice - baseline) / baseline) * 100;
+          const sign = pctChange >= 0 ? "+" : "";
+          changeStr = `${sign}${pctChange.toFixed(2)}%`;
+
+          if (pctChange > 0.001) changeColor = "emerald";
+          else if (pctChange < -0.001) changeColor = "rose";
+          else changeColor = "sky";
+        }
+
+        return {
+          ...item,
+          price: priceStr,
+          change: changeStr,
+          changeColor,
+        };
+      }),
+    [ticksBySymbol]
+  );
+
   return {
     focusSymbol: FOCUS_SYMBOL,
     subscribedSymbols: SUBSCRIBED_SYMBOLS,
@@ -126,5 +178,6 @@ export default function useDashboardData() {
     priceSummary,
     lastTickForFocus,
     analyticsForFocus,
+    watchlistItems,
   };
 }

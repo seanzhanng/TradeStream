@@ -8,7 +8,7 @@ import MetricGrid from "@/components/dashboard/MetricGrid";
 import StreamPanel from "@/components/dashboard/StreamPanel";
 import WatchlistCard from "@/components/watchlist/WatchlistCard";
 import AlertsCard from "@/components/alerts/AlertsCard";
-import { ALERT_ITEMS, WATCHLIST_ITEMS } from "@/lib/dashboardData";
+import { ALERT_ITEMS } from "@/lib/dashboardData";
 import useDashboardData from "@/hooks/useDashboardData";
 
 export default function DashboardPage() {
@@ -18,6 +18,7 @@ export default function DashboardPage() {
     streamEvents,
     priceSeries,
     priceSummary,
+    watchlistItems,
   } = useDashboardData();
 
   return (
@@ -49,7 +50,7 @@ export default function DashboardPage() {
 
           {/* Right column: watchlist + alerts */}
           <div className="hidden w-80 flex-col gap-4 lg:flex xl:w-96">
-            <WatchlistCard items={WATCHLIST_ITEMS} />
+            <WatchlistCard items={watchlistItems} />
             <AlertsCard alerts={ALERT_ITEMS} />
           </div>
         </section>

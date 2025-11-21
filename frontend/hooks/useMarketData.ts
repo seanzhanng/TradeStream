@@ -93,6 +93,7 @@ export default function useMarketData(symbols: string[], focusSymbol: string) {
               text: `[${timeStr}] ${tick.symbol} • $${tick.price.toFixed(
                 2
               )} @ ${tick.volume}`,
+              symbol: tick.symbol,
             };
 
             return {

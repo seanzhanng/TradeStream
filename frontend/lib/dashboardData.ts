@@ -40,6 +40,7 @@ export interface StreamEvent {
   id: string;
   type: StreamEventType;
   text: string;
+  symbol?: string;
 }
 
 export const STREAM_EVENTS: StreamEvent[] = [
